@@ -144,8 +144,10 @@ common_words |>
 ```
 
 
+#Bigram frequencies
+An n-gram is a contiguous series of words from a text; e.g., a bigram is a pair of words, with n = 2.
 
-
+Split the text column into bigram tokens:
 ```{R}
 story_bigrams <- all_stories |>
   unnest_tokens(bigram, text, token = "ngrams", n = 2) |>
@@ -168,6 +170,85 @@ story_bigrams |>
   scale_y_reordered() +
   labs(y = NULL)
 ```
+
+#Verbs that follow she or he
+First, let’s define the pronouns of interest:
+
+```{R}
+pronouns <- c("he", "she")
+```
+
+Filter the dataset for bigrams that start with either “she” or “he” and calculate the number of times these bigrams appeared.
+
+```{R}
+bigram_counts <- story_bigrams |>
+  count(bigram, sort = TRUE) |>
+  separate(bigram, into = c("word1", "word2"), sep = " ") |>
+  filter(word1 %in% pronouns) |>
+  count(word1, word2, wt = n, sort = TRUE) |>
+  rename(total = n)
+
+bigram_counts
+```
+
+What can we do next to see if there is a difference in the types of verbs that follow “he” vs. “she”?
+Which words have about the same likelihood of following “he” or “she” in the texts?
+
+```{R}
+word_ratios <- bigram_counts |>
+  group_by(word2) |>
+  filter(sum(total) > 10) |>
+  ungroup() |>
+  pivot_wider(names_from = word1, values_from = total, values_fill = 0) |>
+  arrange(word2) |>
+  mutate(
+    she = (she+1)/sum(she+1),
+    he = (he+1)/sum(he+1),
+    logratio = log(she / he, base = 2)
+  ) |>
+  arrange(desc(logratio))
+
+word_ratios
+```
+
+```{R}
+word_ratios |> 
+  arrange(abs(logratio))
+```
+
+```{R}
+word_ratios |>
+  mutate(abslogratio = abs(logratio)) |>
+  group_by(logratio < 0) |>
+  top_n(15, abslogratio) |>
+  ungroup() |>
+  mutate(word = reorder(word2, logratio)) |>
+  ggplot(aes(word, logratio, color = logratio < 0)) +
+  geom_segment(
+    aes(
+      x = word, xend = word,
+      y = 0, yend = logratio
+    ),
+    linewidth = 1.1, alpha = 0.6
+  ) +
+  geom_point(size = 3.5) +
+  coord_flip() +
+  labs(
+    x = NULL,
+    y = "Relative appearance after 'she' compared to 'he'",
+    title = "Words paired with 'he' and 'she' in the paranormal stories",
+    subtitle = "Women use, think, and hear while men will, get, and feel"
+  ) +
+  scale_color_discrete(name = "", labels = c("More 'she'", "More 'he'")) +
+  scale_y_continuous(
+    breaks = seq(-3, 3),
+    labels = c(
+      "0.125x", "0.25x", "0.5x",
+      "Same", "2x", "4x", "8x"
+    )
+  )
+```
+
 
 
 

@@ -57,6 +57,9 @@ poltergeist_stories = do.call(rbind, lapply(poltergeist_links, StoryScrape))
 all_stories = rbind(possession_stories,poltergeist_stories)
 ```
 
+```{R}
+all_stories
+```
 
 ## Conclusión
 

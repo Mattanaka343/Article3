@@ -119,7 +119,7 @@ words |>
 
 
 ```{R}
-spooky_matrix
+spooky_matrix = 
 ```
 
 ## Conclusión

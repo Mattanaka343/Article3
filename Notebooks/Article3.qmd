@@ -31,7 +31,11 @@ knitr::opts_chunk$set(echo = FALSE)
 Este proyecto tiene como propósito implementar un clasificador naïve Bayes para categorizar relatos de fenómenos paranormales recopilados en línea mediante técnicas de web scraping. La base de datos se construyó a partir de historias obtenidas del sitio Your Ghost Stories, en las cuales se registran eventos sobrenaturales narrados por usuarias y usuarios de diferentes regiones. Los relatos fueron procesados mediante técnicas de análisis de texto y transformados en representaciones vectoriales a través de matrices dispersas, que permiten capturar la frecuencia de palabras relevantes asociadas a cada tipo de evento. Posteriormente, se entrenaron modelos probabilísticos naïve Bayes, incluyendo variantes con distribución Poisson y Laplace smoothing, para evaluar su desempeño en tareas de clasificación binaria y multiclase. Los resultados fueron evaluados en términos de accuracy, precision, recall, F1-score y matriz de confusión, mostrando la pertinencia de los métodos probabilísticos en problemas de minería de texto, así como las limitaciones impuestas por la naturaleza de los datos.
 
 ## Introducción
+El análisis de fenómenos paranormales ha sido tradicionalmente abordado desde una perspectiva anecdótica, donde los relatos recopilados representan experiencias subjetivas difíciles de sistematizar. Sin embargo, el auge del procesamiento de lenguaje natural (NLP) y la minería de texto ha abierto la posibilidad de estudiar este tipo de narrativas desde un enfoque cuantitativo. Una técnica particularmente útil para ello es el clasificador naïve Bayes, un modelo probabilístico que, a partir de supuestos de independencia condicional entre variables, permite categorizar textos en función de las características lingüísticas que presentan.
 
+Para este proyecto, se construyó un conjunto de datos de relatos paranormales mediante web scraping del portal Your Ghost Stories, validando previamente la viabilidad legal y técnica de la recolección de información a través de la función paths_allowed() del paquete robotstxt en R. Cada historia fue procesada para extraer su título, lugar, tipo de evento y descripción completa, constituyendo la base de análisis. Posteriormente, el texto fue transformado en una matriz dispersa utilizando herramientas como tidytext y stringr, lo cual facilitó la vectorización de palabras y la eliminación de stop words.
+
+El modelo naïve Bayes se entrenó inicialmente para clasificación multiclase y posteriormente para una clasificación dicotómica con el fin de evaluar diferencias en desempeño. Asimismo, se exploraron variantes del modelo utilizando distribución Poisson y Laplace smoothing, con la finalidad de mitigar los problemas derivados de los ceros frecuentes en los conteos de palabras. Finalmente, se aplicó validación cruzada para ajustar parámetros y seleccionar la configuración más adecuada. De esta manera, el presente trabajo no solo ejemplifica la aplicación de técnicas de NLP y aprendizaje automático en contextos no convencionales, sino que también muestra cómo estas herramientas pueden aportar un marco de análisis más riguroso para fenómenos que tradicionalmente se consideran del ámbito anecdótico o subjetivo.
 
 
 ## Metodología
@@ -109,7 +113,60 @@ stop_words
 ```
 
 ```{R}
-library(ggplot2)
+common_words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  ungroup() |>
+  #limitar a 10 titulos
+  filter(title %in% unique(title)[1:10]) |>
+  ggplot(aes(y = word, x = n, fill = title)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~title, scales = "free") +
+  labs(y = NULL)
+```
+
+```{R}
+common_words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  ungroup() |>
+  #limitar a 10 titulos
+  filter(title %in% unique(title)[1:10]) |>
+  ggplot(aes(y = reorder_within(word, n, title), x = n, fill = title)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~title, scales = "free") +
+  scale_y_reordered() +
+  labs(y = NULL)
+```
+
+
+
+
+```{R}
+story_bigrams <- all_stories |>
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) |>
+  filter(!is.na(bigram))
+
+story_bigrams
+```
+
+```{R}
+story_bigrams |>
+  count(title, bigram, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  ungroup() |>
+  #limitar a 10 titulos
+  filter(title %in% unique(title)[1:10]) |>
+  ggplot(aes(y = reorder_within(bigram, n, title), x = n, fill = title)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~title, scales = "free") +
+  scale_y_reordered() +
+  labs(y = NULL)
 ```
 
 

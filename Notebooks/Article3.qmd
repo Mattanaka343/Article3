@@ -84,24 +84,10 @@ words |>
   kable()  
 ```
 
-```{R}
-words |>
-  anti_join(stop_words) |>
-  count(title, word, sort = TRUE) |>
-  group_by(title) |>
-  slice_head(n = 10) |>
-  filter(title %in% unique(title)[1:10]) |>
 
-  ggplot(aes(y = reorder_within(word, n, title), x = n, fill = title)) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~title, scales = "free") +
-  scale_y_reordered() +
-
-  labs(y = NULL)
-```
 
 ```{R}
-words |>
+graphs= words |>
   anti_join(stop_words) |>
   count(title, word, sort = TRUE) |>
   group_by(title) |>
@@ -119,7 +105,7 @@ words |>
 
 
 ```{R}
-spooky_matrix = 
+
 ```
 
 ## Conclusión

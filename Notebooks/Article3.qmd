@@ -21,6 +21,7 @@ format:
 editor: source
 bibliography: ../Resources/references.bib
 ---
+
 ```{R}
 #| include: false
 knitr::opts_chunk$set(echo = FALSE)
@@ -35,10 +36,11 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Aplicación
 
-Para este proyecto se utilizaron las historias de terror contenidas en *[Your Ghost Stories](https://www.yourghoststories.com/real-ghost-stories.php)*. Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones o exorcismos o aquellas que son sore poltergeists o manifestaciones físicas. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron **50** histarias de ambas categorías de modo que los datos estuvieran bvalnaceados.
+Para este proyecto se utilizaron las historias de terror contenidas en [*Your Ghost Stories*](https://www.yourghoststories.com/real-ghost-stories.php). Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones o exorcismos o aquellas que son sore poltergeists o manifestaciones físicas. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron **50** histarias de ambas categorías de modo que los datos estuvieran bvalnaceados.
 
 ```{R}
 library(tidyverse)
+library(tidytext)
 library(rvest)
 source('../Scripts/StoryScrape.R')
 
@@ -58,9 +60,123 @@ all_stories = rbind(possession_stories,poltergeist_stories)
 ```
 
 ```{R}
+```
+
+```{R}
+head(all_stories)
+library(knitr)
+
+words = all_stories |> unnest_tokens(output = word, input = text)
+words
+```
+
+```{R}
+top10 = words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  pivot_wider(
+    names_from = title, 
+    values_from = n,
+    values_fn = as.character,
+    values_fill = "Not in top 10"
+    ) |>
+  kable()  
+```
+
+```{R}
+graphs= words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  ungroup() |>
+  # limitar a 10 títulos
+  filter(title %in% unique(title)[1:10]) |>
+  ggplot(aes(y = reorder_within(word, n, title), x = n, fill = title)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~title, scales = "free") +
+  scale_y_reordered() +
+  labs(y = NULL)
+
+```
+
+```{R}
+spooky_matrix = words |>
+  anti_join(stop_words) |>
+  count(word, title, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  pivot_wider(
+    names_from = word, 
+    values_from = n,
+    values_fn = as.character,
+    values_fill = "0"
+    ) |>
+  kable()  
+```
+
+
+
+```{R}
+head(all_stories)
+library(knitr)
+
+words = all_stories |> unnest_tokens(output = word, input = text)
+words
+```
+
+```{R}
+top10 = words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  pivot_wider(
+    names_from = title, 
+    values_from = n,
+    values_fn = as.character,
+    values_fill = "Not in top 10"
+    ) |>
+  kable()  
+```
+
+```{R}
+graphs= words |>
+  anti_join(stop_words) |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  ungroup() |>
+  # limitar a 10 títulos
+  filter(title %in% unique(title)[1:10]) |>
+  ggplot(aes(y = reorder_within(word, n, title), x = n, fill = title)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~title, scales = "free") +
+  scale_y_reordered() +
+  labs(y = NULL)
+
+```
+
+```{R}
+spooky_matrix = words |>
+  anti_join(stop_words) |>
+  count(word, title, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  pivot_wider(
+    names_from = word, 
+    values_from = n,
+    values_fn = as.character,
+    values_fill = "0"
+    ) |>
+  kable()  
+```
+
+
+```{R}
 all_stories
 ```
 
 ## Conclusión
-
-

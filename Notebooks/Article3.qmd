@@ -1,0 +1,61 @@
+---
+title: "Cómo el Lenguaje Afecta Nuestras Emociones: Clasificacióon de Historias de Terror"
+authors:
+- Mateo Yañez-Tanaka
+- Jorge Sánchez-Ponce
+- Fernando Ramos-Valdez
+- Fernando Pavía-González
+format:
+  html:
+    toc: true
+    html-math-method: katex
+    embed-resources: true
+    self-contained-math: true
+    df-print: kable
+  pdf:
+    toc: true
+    documentclass: article
+    number-sections: true
+    df-print: kable
+    include-in-header: ../Resources/header.tex
+editor: source
+bibliography: ../Resources/references.bib
+---
+```{R}
+#| include: false
+knitr::opts_chunk$set(echo = FALSE)
+
+```
+
+## Abstract
+
+## Introducción
+
+## Metodología
+
+## Aplicación
+
+Para este proyecto se utilizaron las historias de terror contenidas en *[Your Ghost Stories](https://www.yourghoststories.com/real-ghost-stories.php)*. Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones o exorcismos y aquellas que no son sobre esto. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron **50** histarias de ambas categorías de modo que los datos estuvieran bvalnaceados.
+
+```{R}
+library(tidyverse)
+library(rvest)
+
+html1 = read_html('https://www.yourghoststories.com/ghost-stories-categories.php?category=10&page=1')
+
+possession_links = html1 |> html_elements('.rowlight a') |> html_attr('href')
+possession_links =  paste0('https://www.yourghoststories.com/', possesion_links)
+
+for (link in possession_links){
+  html = read_html(link)
+}
+
+```
+
+```{R}
+possession_links
+```
+
+## Conclusión
+
+

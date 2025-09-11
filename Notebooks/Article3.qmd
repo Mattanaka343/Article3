@@ -28,14 +28,25 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Abstract
+Este proyecto tiene como propósito implementar un clasificador naïve Bayes para categorizar relatos de fenómenos paranormales recopilados en línea mediante técnicas de web scraping. La base de datos se construyó a partir de historias obtenidas del sitio Your Ghost Stories, en las cuales se registran eventos sobrenaturales narrados por usuarias y usuarios de diferentes regiones. Los relatos fueron procesados mediante técnicas de análisis de texto y transformados en representaciones vectoriales a través de matrices dispersas, que permiten capturar la frecuencia de palabras relevantes asociadas a cada tipo de evento. Posteriormente, se entrenaron modelos probabilísticos naïve Bayes, incluyendo variantes con distribución Poisson y Laplace smoothing, para evaluar su desempeño en tareas de clasificación binaria y multiclase. Los resultados fueron evaluados en términos de accuracy, precision, recall, F1-score y matriz de confusión, mostrando la pertinencia de los métodos probabilísticos en problemas de minería de texto, así como las limitaciones impuestas por la naturaleza de los datos.
 
 ## Introducción
+
+
 
 ## Metodología
 
 ## Aplicación
 
 Para este proyecto se utilizaron las historias de terror contenidas en *[Your Ghost Stories](https://www.yourghoststories.com/real-ghost-stories.php)*. Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones o exorcismos o aquellas que son sore poltergeists o manifestaciones físicas. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron **50** histarias de ambas categorías de modo que los datos estuvieran bvalnaceados.
+
+```{R}
+library(robotstxt)
+library(bnlearn)
+
+paths_allowed("https://www.yourghoststories.com/ghost-stories-categories.php?category=10&page=1")
+```
+
 
 ```{R}
 library(tidyverse)
@@ -60,6 +71,49 @@ all_stories = rbind(possession_stories,poltergeist_stories)
 ```{R}
 all_stories
 ```
+
+✏️ Construyan una sparse matrix que incluya la frecuencia de cada palabra en los relatos scrapeados, donde cada renglón representa un relato diferente y donde las columnas son las diferentes palabras. Esta matriz también debe contener el tipo de evento paranormal. La función unnest_tokens() les puede ayudar. Consideren eliminar las palabras comunes en inglés a través de las stop words. Todo este proceso se conoce como un count vectorizer, que significa transformar texto a vectores.
+
+```{R}
+install.packages("tidytext")
+install.packages("dplyr")
+library(tidytext)
+library(knitr)
+library(janeaustenr) # install.packages("janeaustenr)
+library(tidyr)
+library(dplyr)
+```
+
+
+```{R}
+common_words <- all_stories |>
+  unnest_tokens(output = word, input = text) # token = "words" by default
+```
+
+```{R}
+common_words |>
+  count(title, word, sort = TRUE) |>
+  group_by(title) |>
+  slice_head(n = 10) |>
+  pivot_wider(
+    names_from = title, 
+    values_from = n,
+    values_fn = as.character,
+    values_fill = "Not in top 10"
+    ) |>
+  kable()
+```
+
+```{R}
+stop_words
+```
+
+```{R}
+library(ggplot2)
+```
+
+
+
 
 ## Conclusión
 

@@ -76,7 +76,7 @@ all_stories = rbind(possession_stories,poltergeist_stories)
 all_stories
 ```
 
-✏️ Construyan una sparse matrix que incluya la frecuencia de cada palabra en los relatos scrapeados, donde cada renglón representa un relato diferente y donde las columnas son las diferentes palabras. Esta matriz también debe contener el tipo de evento paranormal. La función unnest_tokens() les puede ayudar. Consideren eliminar las palabras comunes en inglés a través de las stop words. Todo este proceso se conoce como un count vectorizer, que significa transformar texto a vectores.
+# Análisis de texto
 
 ```{R}
 install.packages("tidytext")
@@ -144,10 +144,10 @@ common_words |>
 ```
 
 
-#Bigram frequencies
-An n-gram is a contiguous series of words from a text; e.g., a bigram is a pair of words, with n = 2.
+# Bigram frequencies
+Un n-grama es una serie contigua de palabras de un texto; por ejemplo, un bigrama es un par de palabras, con n = 2.
 
-Split the text column into bigram tokens:
+Divida la columna de texto en tokens de bigrama:
 ```{R}
 story_bigrams <- all_stories |>
   unnest_tokens(bigram, text, token = "ngrams", n = 2) |>
@@ -171,14 +171,14 @@ story_bigrams |>
   labs(y = NULL)
 ```
 
-#Verbs that follow she or he
-First, let’s define the pronouns of interest:
+# Verbs that follow she or he
+Primero, definimos los pronombres:
 
 ```{R}
 pronouns <- c("he", "she")
 ```
 
-Filter the dataset for bigrams that start with either “she” or “he” and calculate the number of times these bigrams appeared.
+Filtra el conjunto de datos en busca de bigramas que comiencen con “ella” o “él” y calcula la cantidad de veces que aparecieron estos bigramas.
 
 ```{R}
 bigram_counts <- story_bigrams |>
@@ -191,8 +191,8 @@ bigram_counts <- story_bigrams |>
 bigram_counts
 ```
 
-What can we do next to see if there is a difference in the types of verbs that follow “he” vs. “she”?
-Which words have about the same likelihood of following “he” or “she” in the texts?
+¿Qué podemos hacer ahora para ver si hay una diferencia entre los tipos de verbos que siguen a "él" y "ella"?
+¿Qué palabras tienen aproximadamente la misma probabilidad de ir después de "él" o "ella" en los textos?
 
 ```{R}
 word_ratios <- bigram_counts |>
@@ -249,7 +249,18 @@ word_ratios |>
   )
 ```
 
+# Sentiment análisis
+Una forma de analizar el sentimiento de un texto es considerarlo como una combinación de sus palabras individuales y el contenido sentimental del texto completo como la suma del contenido sentimental de cada palabra. Esta no es la única forma de abordar el análisis de sentimiento, pero es un enfoque frecuente que aprovecha naturalmente el ecosistema de herramientas de Tidy.
 
+```{R}
+install.packages("textdata")
+library(textdata)
+```
+
+```{R}
+sentiments <- get_sentiments("afinn")
+sentiments
+```
 
 
 

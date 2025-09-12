@@ -249,6 +249,8 @@ word_ratios |>
   )
 ```
 
+El análisis evidencia que existen diferencias claras en los verbos que siguen a “he” y “she” en los relatos paranormales, lo cual refleja patrones narrativos distintos asociados al género. Después de “she” aparecen con mayor frecuencia verbos relacionados con procesos internos o de percepción como used, thought y heard, lo que sugiere una representación más introspectiva o reflexiva. En contraste, tras “he” predominan verbos de acción o resultado como got, would, felt y told, lo que proyecta una narrativa más activa o externa. En conjunto, estos resultados indican que el discurso tiende a construir a las mujeres como personajes que piensan, oyen o recuerdan, mientras que a los hombres se les vincula con acciones, decisiones o consecuencias, reforzando estereotipos de género en la forma en que se narran las experiencias.
+
 # Sentiment análisis
 Una forma de analizar el sentimiento de un texto es considerarlo como una combinación de sus palabras individuales y el contenido sentimental del texto completo como la suma del contenido sentimental de cada palabra. Esta no es la única forma de abordar el análisis de sentimiento, pero es un enfoque frecuente que aprovecha naturalmente el ecosistema de herramientas de Tidy.
 
@@ -260,6 +262,22 @@ library(textdata)
 ```{R}
 sentiments <- get_sentiments("afinn")
 sentiments
+```
+
+```{R}
+bigram_counts |>
+  left_join(sentiments, by = c("word2" = "word")) |>
+  filter(!is.na(value)) |>
+  mutate(sentiment = total * value) |>
+  group_by(word1) |>
+  arrange(desc(abs(sentiment))) |>
+  slice_head(n = 10)
+```
+
+El análisis muestra un balance mixto entre palabras positivas y negativas, pero con una inclinación hacia lo negativo debido al peso de términos como died, que con cuatro apariciones alcanza un puntaje de -12 y se convierte en la palabra más influyente del conjunto. Aunque también se observan expresiones positivas como enjoys, laughed, loved o devoted, estas no logran contrarrestar por completo la carga negativa dominante. En conjunto, el texto refleja un tono general tendiente a lo negativo, matizado por algunos elementos positivos que aportan variabilidad al sentimiento global.
+
+```{R}
+
 ```
 
 

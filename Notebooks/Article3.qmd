@@ -40,6 +40,7 @@ El modelo naïve Bayes se entrenó inicialmente para clasificación multiclase y
 
 ## Metodología
 
+
 ## Aplicación
 
 Para este proyecto se utilizaron las historias de terror contenidas en *[Your Ghost Stories](https://www.yourghoststories.com/real-ghost-stories.php)*. Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones o exorcismos o aquellas que son sore poltergeists o manifestaciones físicas. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron **50** histarias de ambas categorías de modo que los datos estuvieran bvalnaceados.
@@ -127,6 +128,8 @@ common_words |>
   labs(y = NULL)
 ```
 
+
+
 ```{R}
 common_words |>
   anti_join(stop_words) |>
@@ -143,6 +146,7 @@ common_words |>
   labs(y = NULL)
 ```
 
+El análisis de frecuencia de palabras no comunes en las distintas historias paranormales muestra que cada relato está marcado por vocablos específicos que refuerzan su temática y contexto narrativo. Por ejemplo, en Camp To Remember destacan términos como sheena, ate y camp, que aluden directamente al escenario y protagonistas; en Clash Of Personalities predominan apartment, door y porch, que sitúan el relato en un entorno doméstico; mientras que en A Future Fall resaltan palabras como church, demon y graveyard, asociadas a lo religioso y lo sobrenatural. En conjunto, estos patrones sugieren que las palabras poco comunes funcionan como anclajes semánticos que construyen la atmósfera de cada historia, diferenciándolas entre sí y enfatizando elementos centrales —ya sea lugares, personajes o conceptos sobrenaturales— que definen el tono y la experiencia narrativa de lo paranormal.
 
 # Bigram frequencies
 Un n-grama es una serie contigua de palabras de un texto; por ejemplo, un bigrama es un par de palabras, con n = 2.
@@ -170,6 +174,8 @@ story_bigrams |>
   scale_y_reordered() +
   labs(y = NULL)
 ```
+
+El análisis de bigramas en las historias paranormales muestra cómo ciertas combinaciones de palabras se repiten y ayudan a construir tanto la narrativa como la atmósfera de cada relato. En Camp To Remember destacan frases como she was y she said, que enfatizan testimonios y descripciones de personajes; en Clash Of Personalities sobresalen of the y it was, estructuras comunes que refuerzan el tono descriptivo; mientras que en Disturbing Noise Late At aparecen my mum y mum and dad, lo que sitúa la historia en un contexto familiar. Otros relatos, como A Future Fall o A Loud Bang, muestran bigramas ligados a escenas concretas como the church, my dogs o knock knock, que generan cercanía y tensión narrativa. En conjunto, estos patrones evidencian que los bigramas no solo refuerzan el estilo narrativo, sino que también aportan cohesión y verosimilitud al texto, repitiendo estructuras que anclan al lector en situaciones específicas, emociones o escenarios característicos de lo paranormal.
 
 # Verbs that follow she or he
 Primero, definimos los pronombres:

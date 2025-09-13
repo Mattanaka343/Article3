@@ -43,6 +43,7 @@ El modelo naïve Bayes se entrenó inicialmente para clasificación multiclase y
 
 ## Metodología
 
+
 ## Aplicación
 
 Para este proyecto se utilizaron las historias de terror contenidas en [*Your Ghost Stories*](https://www.yourghoststories.com/real-ghost-stories.php). Se decidió que se trataría únicamente con dos tipos de historias, aquellas que son sobre demonios, posesiones y exorcismos y aquellas que son sobre poltergeists y manifestaciones físicas. Para generar los datos que se usaron para el clasificador se hizo una técnica conocida como *web scraping* que nos permite recolectar el texto que contiene una página web y se recolectaron únicamente las descripciones, el tipo de historia del que se trata, el lugar donde ocurrió y el título del relato. Se recolectaron 200 histarias en total, 100 de cada categoría de modo que los datos estuvieran balnaceados.
@@ -80,7 +81,7 @@ Después de aplicar esta técnica se realizó un proceso conocido como *count ve
 
 ### Análisis de Texto
 
-Tras haberle aplciado este proceso a los datos, se ralizó un análisis del texto contenido en cada historia. Se comenzó por oservar las diez palabras más frecuentes en cada historia para ver si es un buen indicador común en los diferentes tipos de historias. Este análisis sin embargo no resultó muy útil debido a que las palabras usadas por los diferentes diferían bastante de historia a historia, sin embargo, se puede notar que palabras relacionadas a la biblia son decentemente relevantes para las historias de posesiones, demonios o exorcismos. 
+Tras haberle aplciado este proceso a los datos, se ralizó un análisis del texto contenido en cada historia. Se comenzó por oservar las diez palabras más frecuentes en cada una para ver si es un buen indicador en las diferentes categorías. Este anáisis permitió notar lo siguiente: cada relato está marcado por vocablos específicos que refuerzan su temática y contexto narrativo. Por ejemplo, en *A Camp To Remember* destacan términos como *sheena*, *ate* y *camp*, que aluden directamente al escenario y protagonistas; en *Clash Of Personalities* predominan *apartment*, *door* y *porch*, que sitúan el relato en un entorno doméstico; mientras que en *A Future Fall* resaltan palabras como *church*, *demon* y *graveyard*, asociadas a lo religioso y lo sobrenatural. En conjunto, estos patrones sugieren que las palabras poco comunes funcionan como anclajes semánticos que construyen la atmósfera de cada historia, diferenciándolas entre sí y enfatizando elementos centrales (lugares, personajes o conceptos sobrenaturales) que definen el tono y la experiencia narrativa de lo paranormal.
 
 ```{R}
 words = all_stories |> unnest_tokens(output = word, input = text)
@@ -114,7 +115,7 @@ graphs= words |>
 graphs
 ```
 
-Otro factor que se consideró importante fue las combinaciones de palabras, en específico en pares. Analizar esto ayuda a obtener una idea sobre cómo se construyen las historias, el tono que intentan dar y cómo caracterizan a sus personajes. En específico este análisis se utilizó para ver si hay alguna diferencia entre cómo se caracterizan los diferentes géneros en este tipo de historias. Para esto se separaron las palaras contiguas a los pronombres *he* y *she*. Con esto se cooncluyó que los roles de los hombres en estas historias son 
+Otro factor que se consideró importante fue las combinaciones de palabras, en específico en pares (bigramas). Analizar esto puede ayudar a obtener una idea sobre cómo se construyen las historias, el tono que intentan dar y cómo caracterizan a sus personajes. En específico este análisis se utilizó para ver si hay alguna diferencia entre cómo se caracterizan los diferentes géneros en este tipo de historias. Para esto se separaron las palaras contiguas a los pronombres *"he"* y *"she"*. Después de *“she”* aparecen con mayor frecuencia verbos relacionados con procesos internos o de percepción como *"used"*, *"thought"* y *"heard"*, lo que sugiere una representación más introspectiva o reflexiva. En contraste, tras *“he”* predominan verbos de acción o resultado como got, would, felt y told, lo que proyecta una narrativa más activa o externa. En conjunto, estos resultados indican que el discurso tiende a construir a las mujeres como personajes que piensan, oyen o recuerdan, mientras que a los hombres se les vincula con acciones, decisiones o consecuencias, reforzando estereotipos de género en la forma en que se narran las experiencias.
 
 
 ```{R}
@@ -175,17 +176,31 @@ word_ratios |>
   )
 ```
 
+### Anális Sentimental
 
-
-
-
-
-
+Una forma de analizar el sentimiento de un texto es considerarlo como una combinación de sus palabras individuales y el contenido sentimental del texto completo como la suma del contenido sentimental de cada palabra. Esta no es la única forma de abordar el análisis de sentimiento, pero es un enfoque frecuente que aprovecha naturalmente el ecosistema de herramientas de Tidy.
 
 ```{R}
-
+install.packages("textdata")
+library(textdata)
 ```
 
+```{R}
+sentiments <- get_sentiments("afinn")
+sentiments
+```
+
+```{R}
+bigram_counts |>
+  left_join(sentiments, by = c("word2" = "word")) |>
+  filter(!is.na(value)) |>
+  mutate(sentiment = total * value) |>
+  group_by(word1) |>
+  arrange(desc(abs(sentiment))) |>
+  slice_head(n = 10)
+```
+
+El análisis muestra un balance mixto entre palabras positivas y negativas, pero con una inclinación hacia lo negativo debido al peso de términos como died, que con cuatro apariciones alcanza un puntaje de -12 y se convierte en la palabra más influyente del conjunto. Aunque también se observan expresiones positivas como enjoys, laughed, loved o devoted, estas no logran contrarrestar por completo la carga negativa dominante. En conjunto, el texto refleja un tono general tendiente a lo negativo, matizado por algunos elementos positivos que aportan variabilidad al sentimiento global.
 
 ```{R}
 spooky_matrix = words |>

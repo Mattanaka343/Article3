@@ -59,7 +59,7 @@ library(dplyr)
 library(robotstxt)
 library(bnlearn)
 library(textdata)
-library(naivebayes)
+library(e1071)
 source('../Scripts/StoryScrape.R')
 set.seed(42)
 
@@ -196,33 +196,57 @@ story_sentiments
 
 ### Clasificación de Textos
 
-Con los textos analizados se utilizó el moodelo de clasifación conocido como *Naïve Bayes* para categorizar historias nuevas en alguno de los eventos que incluímos (posesiones exorcismos y demonios o poltergeists y manifestaciones físicas). Para entrenar este modelo se dividieron los datos en 80% para entranmiento y 20% para pruebas. 
+Con los textos analizados se utilizó el moodelo de clasifación conocido como *Naïve Bayes* para categorizar historias nuevas en alguno de los eventos que incluímos (posesiones exorcismos y demonios o poltergeists y manifestaciones físicas). Para entrenar este modelo se dividieron los datos en 80% para entranmiento y 20% para pruebas. Este modelo resultó en la siguiente matriz de confusión
 ```{R}
+set.seed(42)
+words = all_stories |> mutate(full_text = paste(story_id,text)) |> unnest_tokens(output = word, input = full_text)
+
 spooky_matrix = words |>
   anti_join(stop_words) |>
   count(word, story_id, sort = TRUE) |>
+  group_by(story_id) |>
+  slice_head(n = 20) |>
   pivot_wider(
     names_from = word, 
     values_from = n,
     values_fn = as.character,
     values_fill = "0"
-    ) 
+    )
 
 data = all_stories |> select(-text) |> rename(country_of_origin = location)|> rename(type_of_story=category) |> left_join(spooky_matrix,by = 'story_id')
 
-spooky_split = initial_split(data, prop = 0.8)
+
+data = data |> select(-story_id)
+
+
+spooky_split = initial_split(data, prop = 0.8, strata = type_of_story)
 
 training_data = training(spooky_split)
 testing_data = testing(spooky_split)
 
-classifier = naive_bayes(type_of_story ~ ., data = training_data, laplace = TRUE)
+classifier = naiveBayes(type_of_story ~ ., data = training_data, laplace = 1)
+
+test_x = testing_data |> select(-type_of_story)
+  
+predictions = predict(classifier, test_x)
+
+cm = table(Predecido = predictions, ValoresReales= testing_data$type_of_story)
 
 
+cm
 ```
 
+En esta se da a notar la capacidad de predicción del modelo con un total de 34 predicciones correctas de un total de 40 historias usadas para probar. Aunado a esto se calcularon los siguientes puntajes:
 ```{R}
+metrics = data.frame(accuracy = c((16+18)/(40), (16+18)/(40)),
+                     recall = c(16/20, 18/20),
+                     precision = c(16/18, 18/22)
+)
 
+row.names(metrics) = c('Demons / Possessions / Exorcisms', 'Poltergeists / Physical Manifestations ')
+
+metrics
 ```
-
+El modelo presenta una exactitud (*accuracy*) de 85% siendo bastante bueno. Presenta una exhaustividad (*recall*) de 80% y 90% respectivamente lo cual evoca que no predice ninguna clase desproporcionadamente. Finalmente presenta precisiones de 89% y 82% por lo que se puede inferir que el valor de predicciones positivas se acercó mucho al real sustendo la aseveración que no sobrepredice ninguna clase 
 
 ## Conclusión

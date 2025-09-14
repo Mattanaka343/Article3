@@ -1,7 +1,7 @@
 StoryScrape = function(url) {
     page = read_html(url)
 
-    title = page |> html_node('.storytitle') |> html_text()
+    story_id = page |> html_node('.storytitle') |> html_text()
 
     
     if (length(page |> html_elements('.storyinfo a') |> html_text()) < 5){
@@ -21,7 +21,7 @@ StoryScrape = function(url) {
     text = page |> html_element('#story') |> html_text()
 
     data.frame(
-        title = title,
+        story_id = story_id,
         location = location,
         category = category,
         text = text,

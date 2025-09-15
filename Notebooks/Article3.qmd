@@ -25,7 +25,8 @@ bibliography: ../Resources/references.bib
 ```{R}
 #| include: false
 knitr::opts_chunk$set(echo = FALSE)
-
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ## Abstract
@@ -43,6 +44,27 @@ El modelo naïve Bayes se entrenó inicialmente para clasificación multiclase y
 
 ## Metodología
 
+Para este proyecto se utilizaron las redes bayesianas (BN) para generar un clasificador de Naïve Bayes. Este clasificador asume que el único nodo padre en el sistema es la clase y loos nodos hijos el resto de variables. También se asume que los nodos hijos no se relacionan entre ellos, esto genera una estructura del estilo
+```{R}
+dag = model2network('[Y][X1|Y][X2|Y][X3|Y][...|Y][Xn|Y]')
+graphviz.plot(dag, shape = 'ellipse')
+```
+y nos permite generar la función de distribución global condicional $$f(y,x_1,x_2,\ldots, x_n) = f(y)\prod_{i=1}^nf_i(x_i\mid y)$$ Este tipo de red tamién nos permite clasificar usando la regla de bayes en la cuál para una nueva observación $\tilde{x}$ la probabilidad de $$\mathbb{P}(Y=k \mid X=\tilde{x}) = \frac{\mathbb{P}(X = \tilde{x} \mid Y=k)\mathbb{P}(Y=k)}{\mathbb{P}(X=\tilde{x})}$$ donde $\mathbb{P}(x) = \sum_{1}^k \mathbb{P}(X= \tilde{x} \mid Y= k)\mathbb{P}(Y=k)$. La clase asignada a cada observación es aquella con la mayor probabilidad a posteriori
+
+Este proyecto también utilizó una técnica conocida como *web scrapping*, esta se refiere a recolectar datos de algún sitio web extrayendolos de su código fuente (usualmente html). Aunado a esto se utilizó una técnica de *tokenización* (asignación de valores numéricos a plabras) conocida como *count vectorizer* que consiste en transformar el texto en una matriz donde cada palabra única se convierte en una columna y cada documento en una fila. El valor numérico asignado a cada palabra corresponde a la cantidad de veces que aparece en ese documento. Finalmente se usaron técnicas de eliminación de *stop words* (palabras que no añaden información) para mantener únicamente las palabras que añaden al texto.
+
+Todos los modelos computacionales usados para este proyecto fueron creados usando R un lenguaje de proggramacion para análisis estadístico. Se utilizaron los siguientes módulos:
+- ```tidyverse``` Para manipulación de datos
+- ```tidytext``` Para procesamiento de lenguaje natural
+- ```tidymodels``` Para preprocesamiento de datos
+- ```tidyr``` Para limpiar datos
+- ```rvest``` Para realizar el *web scraping*
+- ```knitr``` Para generar tablas y reportes dinámicos 
+- ```dplyr``` Para manipulación de datos
+- ```robotstxt``` Para verificar que  este permitido hacer *web scraping* en un sitio
+- ```bnlearn``` Para modelar usando redes bayesianas 
+- ```textdata``` Para tareas de procesamiento de lenguaje natural
+- ```e1071``` Para modelos de *machine learning* 
 
 ## Aplicación
 
